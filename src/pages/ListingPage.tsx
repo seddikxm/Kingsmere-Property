@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -28,6 +28,7 @@ import {
   Train,
   Calculator,
   X,
+  Share2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,6 +114,14 @@ export function ListingPage() {
   const [deposit, setDeposit] = useState(() => Math.round(parsePrice(listing?.price || '0') * 0.2));
   const [rate, setRate] = useState(4.5);
   const [term, setTerm] = useState(25);
+  const [scrolled, setScrolled] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > window.innerHeight * 0.75);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (listing?.price) {
@@ -137,15 +146,26 @@ export function ListingPage() {
     }
   }, [listing]);
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     if (!listing) return;
     setSelectedImage((prev) => (prev + 1) % listing.images.length);
-  };
+  }, [listing]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (!listing) return;
     setSelectedImage((prev) => (prev - 1 + listing.images.length) % listing.images.length);
-  };
+  }, [listing]);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(false);
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'ArrowLeft') prevImage();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [lightbox, nextImage, prevImage]);
 
   if (isLoading) {
     return (
@@ -196,13 +216,43 @@ export function ListingPage() {
         </div>
       </div>
 
+      {/* Scroll-aware sticky summary bar */}
+      <div
+        className={`fixed top-[65px] left-0 right-0 z-30 border-b border-stone-200/80 bg-white/95 px-6 py-3 backdrop-blur-xl transition-transform duration-500 premium-ease ${
+          scrolled ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="truncate font-serif text-base font-medium text-stone-900 sm:text-lg">{listing.title}</p>
+            <p className="truncate text-xs text-stone-500">{listing.address}</p>
+          </div>
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <span className="hidden font-serif text-lg text-stone-900 sm:inline">{listing.price}</span>
+            <Button
+              onClick={() => navigate('/#booking')}
+              size="sm"
+              className="gold transition-all active:scale-[0.98]"
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Book viewing</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Hero */}
       <section className="relative h-svh min-h-[600px] overflow-hidden">
-        <img
-          src={images[selectedImage]}
-          alt={listing.title}
-          className="h-full w-full object-cover transition-transform duration-1000 ease-out"
-        />
+        {images.map((img, idx) => (
+          <img
+            key={idx}
+            src={img}
+            alt={listing.title}
+            className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-out ${
+              idx === selectedImage ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            }`}
+          />
+        ))}
         <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-900/30 to-navy-950/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-navy-950/70 via-transparent to-transparent" />
         <div className="grain-overlay absolute inset-0 opacity-50" />
@@ -262,6 +312,43 @@ export function ListingPage() {
                 <img src={img} alt={`View ${idx + 1}`} className="h-full w-full object-cover" />
               </button>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick info strip */}
+      <div className="border-b border-stone-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-stone-600">
+              <span className="flex items-center gap-2">
+                <BedDouble className="h-4 w-4 text-navy-700" />
+                <span className="font-medium text-stone-900">{listing.beds}</span> beds
+              </span>
+              <span className="flex items-center gap-2">
+                <Bath className="h-4 w-4 text-navy-700" />
+                <span className="font-medium text-stone-900">{listing.baths}</span> baths
+              </span>
+              <span className="flex items-center gap-2">
+                <Maximize className="h-4 w-4 text-navy-700" />
+                <span className="font-medium text-stone-900">{listing.sqft}</span> sq ft
+              </span>
+              <span className="flex items-center gap-2">
+                <Trees className="h-4 w-4 text-navy-700" />
+                <span className="font-medium text-stone-900">{listing.acres}</span> acres
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2000);
+              }}
+              className="flex items-center gap-2 text-sm font-medium text-stone-600 transition-colors hover:text-navy-700"
+            >
+              <Share2 className="h-4 w-4" />
+              {shareCopied ? 'Link copied' : 'Share'}
+            </button>
           </div>
         </div>
       </div>
