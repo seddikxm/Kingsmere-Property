@@ -5,6 +5,7 @@ import { Services } from '@/sections/Services';
 import { About } from '@/sections/About';
 import { Booking } from '@/sections/Booking';
 import { Footer } from '@/sections/Footer';
+import { Testimonials } from '@/sections/Testimonials';
 import type { Service } from '@/types';
 
 export function HomePage() {
@@ -23,6 +24,7 @@ export function HomePage() {
         <Hero onBookClick={() => scrollToBooking()} />
         <Services onSelectService={(service) => scrollToBooking(service)} />
         <About />
+        <Testimonials />
         <div ref={bookingRef}>
           <Booking preselectedService={preselectedService} />
         </div>
