@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -9,9 +9,10 @@ interface ScrollRevealProps {
   y?: number;
   x?: number;
   scale?: number;
+  as?: keyof React.JSX.IntrinsicElements;
 }
 
-const ease = [0.21, 0.47, 0.32, 0.98] as const;
+const easePremium = [0.32, 0.72, 0, 1] as const;
 
 export function ScrollReveal({
   children,
@@ -19,27 +20,35 @@ export function ScrollReveal({
   duration = 0.7,
   once = true,
   className = '',
-  y = 40,
+  y = 24,
   x = 0,
   scale = 1,
+  as,
 }: ScrollRevealProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const Component = as ? (motion as any)[as] : motion.div;
+
+  if (prefersReducedMotion) {
+    return <Component className={className}>{children}</Component>;
+  }
+
   return (
-    <motion.div
+    <Component
       initial={{ opacity: 0, y, x, scale }}
       whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      viewport={{ once, margin: '-80px' }}
-      transition={{ duration, delay, ease }}
+      viewport={{ once, margin: '-40px' }}
+      transition={{ duration, delay, ease: easePremium }}
       className={className}
     >
       {children}
-    </motion.div>
+    </Component>
   );
 }
 
 export function StaggerContainer({
   children,
   className = '',
-  stagger = 0.1,
+  stagger = 0.08,
   delay = 0,
 }: {
   children: React.ReactNode;
@@ -47,11 +56,17 @@ export function StaggerContainer({
   stagger?: number;
   delay?: number;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-80px' }}
+      viewport={{ once: true, margin: '-40px' }}
       transition={{ staggerChildren: stagger, delayChildren: delay }}
       className={className}
     >
@@ -63,17 +78,23 @@ export function StaggerContainer({
 export function StaggerItem({
   children,
   className = '',
-  y = 40,
+  y = 24,
 }: {
   children: React.ReactNode;
   className?: string;
   y?: number;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       variants={{
         hidden: { opacity: 0, y },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease } },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: easePremium } },
       }}
       className={className}
     >

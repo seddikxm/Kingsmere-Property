@@ -27,9 +27,7 @@ export function Navbar({ onBookClick }: NavbarProps) {
   const navLinks: NavLink[] = [
     { label: 'Services', href: '#services' },
     { label: 'Properties', to: '/properties' },
-    { label: 'Listing', to: '/listing' },
     { label: 'About', href: '#about' },
-    { label: 'Book', href: '#booking' },
   ];
 
   return (

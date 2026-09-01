@@ -21,6 +21,18 @@ export function formatPhone(value: string) {
   return value;
 }
 
+export function parsePrice(price: string) {
+  const num = parseFloat(price.replace(/[^0-9.]/g, ''));
+  return isNaN(num) ? 0 : num;
+}
+
+export function formatPriceLabel(price: string) {
+  const num = parsePrice(price);
+  if (num >= 1000000) return `£${(num / 1000000).toFixed(2).replace(/\.00$/, '')}m`;
+  if (num >= 1000) return `£${(num / 1000).toFixed(0)}k`;
+  return price || 'Price on application';
+}
+
 export const WEEKDAYS = [
   { value: 0, label: 'Sunday', short: 'Sun' },
   { value: 1, label: 'Monday', short: 'Mon' },

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Navbar } from '@/sections/Navbar';
 import { Hero } from '@/sections/Hero';
 import { Services } from '@/sections/Services';
+import { FeaturedProperties } from '@/sections/FeaturedProperties';
 import { About } from '@/sections/About';
 import { Booking } from '@/sections/Booking';
 import { Footer } from '@/sections/Footer';
@@ -23,6 +24,7 @@ export function HomePage() {
       <main>
         <Hero onBookClick={() => scrollToBooking()} />
         <Services onSelectService={(service) => scrollToBooking(service)} />
+        <FeaturedProperties />
         <About />
         <Testimonials />
         <div ref={bookingRef}>
