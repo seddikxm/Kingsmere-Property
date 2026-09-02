@@ -5,6 +5,7 @@ export type Service = {
   duration_minutes: number;
   price: number;
   is_active: boolean;
+  image_url: string | null;
   created_at: string;
 };
 

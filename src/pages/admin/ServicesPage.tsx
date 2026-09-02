@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Plus, Store } from 'lucide-react';
+import { Pencil, Plus, Store, ImagePlus, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ type ServiceForm = {
   duration_minutes: number;
   price: number;
   is_active: boolean;
+  image_url: string;
 };
 
 const emptyService: ServiceForm = {
@@ -26,6 +27,7 @@ const emptyService: ServiceForm = {
   duration_minutes: 60,
   price: 0,
   is_active: true,
+  image_url: '',
 };
 
 export function ServicesPage() {
@@ -49,6 +51,7 @@ export function ServicesPage() {
       duration_minutes: service.duration_minutes,
       price: service.price,
       is_active: service.is_active,
+      image_url: service.image_url || '',
     });
     setIsOpen(true);
   };
@@ -95,6 +98,11 @@ export function ServicesPage() {
           {services?.map((service) => (
             <Card key={service.id} className={!service.is_active ? 'opacity-70' : ''}>
               <CardContent className="p-6">
+                {service.image_url ? (
+                  <div className="mb-4 h-32 w-full overflow-hidden rounded-xl">
+                    <img src={service.image_url} alt={service.name} className="h-full w-full object-cover" />
+                  </div>
+                ) : null}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 text-navy-700">
@@ -141,6 +149,32 @@ export function ServicesPage() {
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="image_url">Service image URL</Label>
+            <div className="flex gap-2">
+              <Input
+                id="image_url"
+                placeholder="https://example.com/image.jpg"
+                value={form.image_url}
+                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              />
+              {form.image_url ? (
+                <Button type="button" variant="outline" onClick={() => setForm({ ...form, image_url: '' })}>
+                  <X className="h-4 w-4" />
+                </Button>
+              ) : null}
+            </div>
+            {form.image_url ? (
+              <div className="h-40 w-full overflow-hidden rounded-xl border border-stone-200">
+                <img src={form.image_url} alt="Preview" className="h-full w-full object-cover" />
+              </div>
+            ) : (
+              <div className="flex h-24 w-full flex-col items-center justify-center rounded-xl border border-dashed border-stone-300 bg-stone-50 text-stone-400">
+                <ImagePlus className="h-6 w-6" />
+                <span className="mt-1 text-xs">Paste an image URL to preview it</span>
+              </div>
+            )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">

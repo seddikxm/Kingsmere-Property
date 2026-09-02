@@ -9,8 +9,11 @@ CREATE TABLE IF NOT EXISTS services (
   duration_minutes INTEGER NOT NULL DEFAULT 60,
   price INTEGER NOT NULL DEFAULT 0,
   is_active BOOLEAN NOT NULL DEFAULT true,
+  image_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE services ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 CREATE TABLE IF NOT EXISTS appointments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

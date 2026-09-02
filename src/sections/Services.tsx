@@ -55,7 +55,7 @@ export function Services({ onSelectService }: ServicesProps) {
                   <Card className="group overflow-hidden border-stone-200/80">
                     <div className="relative h-52 overflow-hidden">
                       <img
-                        src={serviceImages[service.name] || serviceImages['Buyer Consultation']}
+                        src={service.image_url || serviceImages[service.name] || serviceImages['Buyer Consultation']}
                         alt={service.name}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
