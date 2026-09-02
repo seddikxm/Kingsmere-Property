@@ -130,7 +130,7 @@ export function AppointmentsPage() {
                           ))}
                         </Select>
                       </td>
-                      <td className="px-4 py-4 text-stone-600 max-w-xs truncate">{appointment.notes || '—'}</td>
+                      <td className="px-4 py-4 text-stone-600 max-w-xs whitespace-normal break-words">{appointment.notes || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
