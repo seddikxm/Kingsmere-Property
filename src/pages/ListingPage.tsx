@@ -37,6 +37,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useListing, useListings } from '@/hooks/useListing';
+import { Seo } from '@/components/Seo';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -255,6 +256,15 @@ export function ListingPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <Seo
+        page="listing"
+        defaults={{
+          title: `${listing.title} — Kingsmere Property`,
+          description:
+            listing.description?.slice(0, 155) ||
+            `${listing.title} — ${listing.beds} bed, ${listing.baths} bath property in ${listing.address}.`,
+        }}
+      />
       {/* Top bar */}
       <div
         className={`fixed top-0 left-0 right-0 z-40 px-6 transition-all duration-300 ${

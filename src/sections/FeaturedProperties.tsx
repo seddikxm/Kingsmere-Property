@@ -96,8 +96,8 @@ export function FeaturedProperties() {
         <ScrollReveal>
           <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-navy-700">Featured homes</span>
-              <h2 className="mt-3 font-serif text-3xl tracking-tight text-stone-900 sm:text-4xl">
+              <span className="text-sm font-semibold uppercase tracking-wider text-navy-700">Featured Properties</span>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
                 A curated selection of properties
               </h2>
               <p className="mt-4 text-lg text-stone-600">
@@ -122,7 +122,7 @@ export function FeaturedProperties() {
         ) : featured.length === 0 ? (
           <ScrollReveal>
             <div className="rounded-[2rem] border border-dashed border-stone-300 bg-white p-12 text-center">
-              <h3 className="font-serif text-2xl text-stone-900">No properties available</h3>
+              <h3 className="text-2xl font-bold text-stone-900">No properties available</h3>
               <p className="mx-auto mt-2 max-w-md text-stone-600">
                 Check back soon for new listings or browse the full collection.
               </p>

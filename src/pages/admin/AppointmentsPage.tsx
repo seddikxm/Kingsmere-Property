@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { format, parse, parseISO } from 'date-fns';
-import { Search, Filter } from 'lucide-react';
+import { Calendar, List, Search, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
+import { AppointmentsCalendar } from '@/components/admin/AppointmentsCalendar';
 import { useAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
 import { Input } from '@/components/ui/input';
 import type { AppointmentStatus } from '@/types';
@@ -13,8 +15,10 @@ const STATUS_OPTIONS: AppointmentStatus[] = ['pending', 'confirmed', 'cancelled'
 export function AppointmentsPage() {
   const { data: appointments, isLoading } = useAppointments();
   const updateStatus = useUpdateAppointmentStatus();
+  const { toast } = useToast();
   const [filter, setFilter] = useState<AppointmentStatus | 'all'>('all');
   const [search, setSearch] = useState('');
+  const [view, setView] = useState<'list' | 'calendar'>('list');
 
   const filtered = useMemo(() => {
     if (!appointments) return [];
@@ -37,7 +41,12 @@ export function AppointmentsPage() {
   }, [appointments, filter, search]);
 
   const handleStatusChange = async (id: string, status: AppointmentStatus) => {
-    await updateStatus.mutateAsync({ id, status });
+    try {
+      await updateStatus.mutateAsync({ id, status });
+      toast(`Appointment ${status}`);
+    } catch {
+      toast('Status update failed', 'error');
+    }
   };
 
   return (
@@ -47,8 +56,35 @@ export function AppointmentsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-stone-900">Appointments</h1>
           <p className="mt-1 text-stone-600">Manage and update client appointment statuses.</p>
         </div>
+        <div className="flex items-center gap-1 self-start rounded-full border border-stone-200 bg-white p-1 shadow-soft">
+          <button
+            onClick={() => setView('list')}
+            className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 ${
+              view === 'list' ? 'bg-navy-800 text-white shadow-soft' : 'text-stone-500 hover:text-stone-900'
+            }`}
+          >
+            <List className="h-4 w-4" />
+            List
+          </button>
+          <button
+            onClick={() => setView('calendar')}
+            className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 ${
+              view === 'calendar' ? 'bg-navy-800 text-white shadow-soft' : 'text-stone-500 hover:text-stone-900'
+            }`}
+          >
+            <Calendar className="h-4 w-4" />
+            Calendar
+          </button>
+        </div>
       </div>
 
+      {view === 'calendar' ? (
+        isLoading ? (
+          <Skeleton className="h-[560px] w-full rounded-2xl" />
+        ) : (
+          <AppointmentsCalendar appointments={appointments || []} />
+        )
+      ) : (
       <Card>
         <CardHeader>
           <CardTitle>All appointments</CardTitle>
@@ -139,6 +175,7 @@ export function AppointmentsPage() {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }

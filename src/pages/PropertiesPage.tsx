@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { useBusinessSettings } from '@/hooks/useBusinessSettings';
 import { useBusinessLogo } from '@/hooks/useBusinessLogo';
 import { useListings } from '@/hooks/useListing';
+import { Seo } from '@/components/Seo';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { parsePrice, formatPriceLabel } from '@/lib/utils';
 import type { Listing } from '@/types';
@@ -271,6 +272,14 @@ export function PropertiesPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <Seo
+        page="properties"
+        defaults={{
+          title: 'Properties — Kingsmere Property',
+          description:
+            'Browse premium homes, country estates, and investment properties with Kingsmere Property.',
+        }}
+      />
       {/* Top bar */}
       <div
         className={`fixed top-0 left-0 right-0 z-40 px-6 transition-all duration-300 ${

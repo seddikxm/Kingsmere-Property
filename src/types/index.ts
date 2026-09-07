@@ -69,6 +69,27 @@ export type ListingAmenity = {
   icon: string;
 };
 
+export type SiteContentEntry = {
+  key: string;
+  value: Record<string, unknown>;
+  updated_at: string;
+};
+
+export type SeoPage = {
+  page_slug: string;
+  meta_title: string;
+  meta_description: string;
+  keywords: string;
+  og_image_url: string | null;
+  updated_at: string;
+};
+
+export type HomepageSection = {
+  section_key: string;
+  enabled: boolean;
+  sort_order: number;
+};
+
 export type Listing = {
   id: string;
   title: string;

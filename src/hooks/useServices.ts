@@ -38,3 +38,28 @@ export function useServiceMutation() {
 
   return { create, update };
 }
+
+export function useImageUpload(folder: string) {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const filePath = `${folder}/${folder}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('business-logos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('business-logos').getPublicUrl(filePath);
+      return urlData.publicUrl;
+    },
+  });
+}
+
+export function useUploadServiceImage() {
+  return useImageUpload('services');
+}

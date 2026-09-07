@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Building2, GripVertical, Plus, Save, Trash2, X, ArrowLeft } from 'lucide-react';
+import { Building2, GripVertical, Plus, Save, Trash2, X, ArrowLeft, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
 import { useListing, useUpdateListing } from '@/hooks/useListing';
+import { useImageUpload } from '@/hooks/useServices';
+import { getErrorMessage } from '@/lib/utils';
 import type { Listing, ListingAmenity } from '@/types';
 
 const amenityIcons = [
@@ -42,11 +45,43 @@ export function EditListingPage() {
   const listingId = searchParams.get('id');
   const { data: listing, isLoading } = useListing(listingId);
   const update = useUpdateListing();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState<Omit<Listing, 'id' | 'created_at' | 'updated_at'>>(emptyListing);
   const [newImage, setNewImage] = useState('');
   const [newFeature, setNewFeature] = useState('');
   const [newAmenity, setNewAmenity] = useState<ListingAmenity>({ label: '', icon: 'BedDouble' });
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const listingFileRef = useRef<HTMLInputElement>(null);
+  const agentFileRef = useRef<HTMLInputElement>(null);
+  const uploadListingImage = useImageUpload('listings');
+  const uploadAgentImage = useImageUpload('agents');
+
+  const handleListingFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const url = await uploadListingImage.mutateAsync(file);
+      setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
+      toast('Image uploaded');
+    } catch {
+      toast('Image upload failed', 'error');
+    }
+  };
+
+  const handleAgentFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const url = await uploadAgentImage.mutateAsync(file);
+      setForm((prev) => ({ ...prev, agent_image: url }));
+      toast('Agent photo uploaded');
+    } catch {
+      toast('Agent photo upload failed', 'error');
+    }
+  };
 
   useEffect(() => {
     if (listing) {
@@ -77,7 +112,14 @@ export function EditListingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!listing) return;
-    await update.mutateAsync({ id: listing.id, ...form });
+    setSaveError(null);
+    try {
+      await update.mutateAsync({ id: listing.id, ...form });
+      toast('Listing saved');
+    } catch (err) {
+      setSaveError(getErrorMessage(err));
+      toast('Failed to save listing', 'error');
+    }
   };
 
   const addImage = () => {
@@ -219,18 +261,33 @@ export function EditListingPage() {
               <CardTitle>Images</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Input
                   placeholder="Image URL"
                   value={newImage}
                   onChange={(e) => setNewImage(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImage(); } }}
+                  className="min-w-[200px] flex-1"
                 />
+                <input
+                  ref={listingFileRef}
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={handleListingFileChange}
+                  className="hidden"
+                />
+                <Button type="button" variant="outline" onClick={() => listingFileRef.current?.click()} disabled={uploadListingImage.isPending}>
+                  <Upload className="h-4 w-4" />
+                  {uploadListingImage.isPending ? 'Uploading...' : 'Upload'}
+                </Button>
                 <Button type="button" onClick={addImage}>
                   <Plus className="h-4 w-4" />
                   Add
                 </Button>
               </div>
+              {uploadListingImage.isError ? (
+                <p className="text-sm text-red-600">Image upload failed. Check your connection and try again.</p>
+              ) : null}
               <div className="space-y-2">
                 {form.images.map((img, idx) => (
                   <div key={idx} className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3">
@@ -342,13 +399,46 @@ export function EditListingPage() {
                   <Input id="agent_email" type="email" value={form.agent_email} onChange={(e) => setForm({ ...form, agent_email: e.target.value })} required />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="agent_image">Agent photo URL</Label>
-                  <Input id="agent_image" value={form.agent_image || ''} onChange={(e) => setForm({ ...form, agent_image: e.target.value })} />
+                  <Label htmlFor="agent_image">Agent photo</Label>
+                  <div className="flex flex-wrap items-start gap-3">
+                    {form.agent_image ? (
+                      <img src={form.agent_image} alt="Agent" className="h-20 w-20 rounded-2xl border border-stone-200 object-cover" />
+                    ) : (
+                      <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-stone-300">
+                        <Upload className="h-6 w-6" />
+                      </div>
+                    )}
+                    <div className="min-w-[200px] flex-1 space-y-2">
+                      <Input
+                        id="agent_image"
+                        placeholder="Paste a photo URL"
+                        value={form.agent_image || ''}
+                        onChange={(e) => setForm({ ...form, agent_image: e.target.value })}
+                      />
+                      <input
+                        ref={agentFileRef}
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleAgentFileChange}
+                        className="hidden"
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={() => agentFileRef.current?.click()} disabled={uploadAgentImage.isPending}>
+                        <Upload className="h-4 w-4" />
+                        {uploadAgentImage.isPending ? 'Uploading...' : 'Upload from device'}
+                      </Button>
+                      {uploadAgentImage.isError ? (
+                        <p className="text-sm text-red-600">Upload failed. Check your connection and try again.</p>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {saveError ? (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{saveError}</p>
+          ) : null}
           <div className="flex justify-end">
             <Button type="submit" disabled={update.isPending} size="lg">
               <Save className="h-4 w-4" />

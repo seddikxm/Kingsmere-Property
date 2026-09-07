@@ -5,6 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getErrorMessage(err: unknown): string {
+  if (typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message: unknown }).message === 'string') {
+    return (err as { message: string }).message;
+  }
+  if (typeof err === 'object' && err !== null && 'error_description' in err) {
+    return String((err as { error_description: unknown }).error_description);
+  }
+  return JSON.stringify(err) || 'Something went wrong. Please try again.';
+}
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',

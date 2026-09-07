@@ -29,7 +29,7 @@ export function Services({ onSelectService }: ServicesProps) {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mb-16 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <ScrollReveal className="max-w-2xl">
-            <span className="text-sm font-semibold uppercase tracking-wider text-navy-700">Real Estate Services</span>
+            <span className="text-sm font-semibold uppercase tracking-wider text-navy-700">Kingsmere Property Services</span>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
               Consultations designed around your property goals
             </h2>

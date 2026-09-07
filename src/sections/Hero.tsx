@@ -3,6 +3,8 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowRight, Calendar, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IMAGES } from '@/lib/constants';
+import { useSiteContent } from '@/hooks/useSiteContent';
+import { DEFAULT_HERO_CONTENT, mergeContent } from '@/lib/site-content';
 
 interface HeroProps {
   onBookClick: () => void;
@@ -48,12 +50,6 @@ function CountUp({ target, suffix = '', duration = 2000 }: { target: number; suf
   );
 }
 
-const stats = [
-  { value: 12, suffix: '+', label: 'Years of market experience' },
-  { value: 500, suffix: '+', label: 'Clients guided home' },
-  { value: 24, suffix: 'h', label: 'Average response time' },
-];
-
 const ease = [0.21, 0.47, 0.32, 0.98] as const;
 
 const containerVariants = {
@@ -92,6 +88,8 @@ const statItemVariants = {
 };
 
 export function Hero({ onBookClick }: HeroProps) {
+  const { data: content } = useSiteContent();
+  const hero = mergeContent(DEFAULT_HERO_CONTENT, content?.hero);
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -105,7 +103,7 @@ export function Hero({ onBookClick }: HeroProps) {
     <section ref={sectionRef} className="relative min-h-screen overflow-hidden">
       <motion.div style={{ y: imageY, scale: imageScale }} className="absolute inset-0">
         <img
-          src={IMAGES.hero}
+          src={hero.image || IMAGES.hero}
           alt="Modern luxury home exterior"
           className="h-full w-full object-cover"
         />
@@ -122,24 +120,23 @@ export function Hero({ onBookClick }: HeroProps) {
         >
           <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-sm">
             <MapPin className="h-4 w-4 text-gold-400" />
-            <span className="text-sm font-medium text-white/90">Premium Real Estate Services</span>
+            <span className="text-sm font-medium text-white/90">{hero.badge}</span>
           </motion.div>
           <motion.h1 variants={itemVariants} className="text-balance text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Find your place. <br />
-            <span className="text-gold-400">With confidence.</span>
+            {hero.titleTop} <br />
+            <span className="text-gold-400">{hero.titleAccent}</span>
           </motion.h1>
           <motion.p variants={itemVariants} className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 sm:text-xl">
-            Expert real estate guidance for buyers, sellers, and investors. Schedule a personal
-            consultation and take the next step toward your property goals.
+            {hero.subtitle}
           </motion.p>
           <motion.div variants={itemVariants} className="mt-10 flex flex-wrap items-center gap-4">
             <Button size="lg" onClick={onBookClick} className="gold px-8">
               <Calendar className="h-5 w-5" />
-              Schedule your consultation
+              {hero.primaryCta}
             </Button>
             <a href="#services">
               <Button size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white px-8">
-                Explore services
+                {hero.secondaryCta}
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </a>
@@ -155,7 +152,7 @@ export function Hero({ onBookClick }: HeroProps) {
             animate="visible"
             className="grid gap-4 rounded-3xl border border-white/10 bg-white/10 p-2 backdrop-blur-xl shadow-lift sm:grid-cols-3"
           >
-            {stats.map((stat) => (
+            {hero.stats.map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={statItemVariants}

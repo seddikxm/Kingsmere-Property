@@ -5,73 +5,38 @@ import {
   ReviewStars,
 } from "@/components/ui/animated-cards-stack"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-const TESTIMONIALS = [
-  {
-    id: "testimonial-1",
-    name: "Sarah & James H.",
-    profession: "Homeowners",
-    rating: 5,
-    description:
-      "Kingsmere Property made buying our first home effortless. Their attention to detail and market knowledge gave us complete confidence from start to finish.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
-  },
-  {
-    id: "testimonial-2",
-    name: "Margaret T.",
-    profession: "Property Investor",
-    rating: 5,
-    description:
-      "A truly premium service. They handled everything with discretion, secured a fantastic tenant, and kept me informed at every step. Highly recommended.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
-  },
-  {
-    id: "testimonial-3",
-    name: "Richard & Eleanor B.",
-    profession: "Sellers",
-    rating: 4.5,
-    description:
-      "From valuation to completion, the team was professional, responsive, and genuinely invested in achieving the best outcome for our family home.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
-  },
-  {
-    id: "testimonial-4",
-    name: "David K.",
-    profession: "Landlord",
-    rating: 5,
-    description:
-      "The property management service is outstanding. My portfolio has never been in better hands — they treat every unit as if it were their own.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop",
-  },
-]
+import { useSiteContent } from "@/hooks/useSiteContent"
+import {
+  DEFAULT_TESTIMONIALS_CONTENT,
+  mergeContent,
+} from "@/lib/site-content"
 
 export function Testimonials() {
+  const { data: content } = useSiteContent()
+  const testimonials = mergeContent(DEFAULT_TESTIMONIALS_CONTENT, content?.testimonials)
+  const items = testimonials.items
+
   return (
     <section className="bg-cream px-6 py-24 md:px-8 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center">
           <span className="mb-3 block text-sm font-medium uppercase tracking-wider text-gold-600">
-            Client Stories
+            {testimonials.eyebrow}
           </span>
           <h2 className="text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-            Testimonials
+            {testimonials.heading}
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-stone-600">
-            Hear from the buyers, sellers, and landlords who trust Kingsmere
-            Property with their most important assets.
+            {testimonials.subheading}
           </p>
         </div>
       </div>
       <ContainerScroll className="h-[300vh]">
         <div className="sticky left-0 top-0 flex h-svh w-full items-center justify-center py-12">
           <CardsContainer className="mx-auto h-[420px] w-[340px]">
-            {TESTIMONIALS.map((testimonial, index) => (
+            {items.map((testimonial, index) => (
               <CardTransformed
-                arrayLength={TESTIMONIALS.length}
+                arrayLength={items.length}
                 key={testimonial.id}
                 variant="light"
                 index={index + 2}
